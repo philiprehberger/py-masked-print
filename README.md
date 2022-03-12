@@ -6,7 +6,7 @@
 
 Automatically mask sensitive values (API keys, passwords, tokens) in logs and print output.
 
-## Install
+## Installation
 
 ```bash
 pip install philiprehberger-masked-print
