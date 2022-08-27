@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-masked-print"
-version = "0.1.5"
+version = "0.1.6"
 description = "Automatically mask sensitive values (API keys, passwords, tokens) in logs and print output"
 readme = "README.md"
 license = "MIT"
@@ -31,3 +31,9 @@ Changelog = "https://github.com/philiprehberger/py-masked-print/blob/main/CHANGE
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/philiprehberger_masked_print"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[tool.mypy]
+strict = true
