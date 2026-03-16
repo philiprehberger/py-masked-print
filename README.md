@@ -68,6 +68,14 @@ logger.info("Using key sk-proj-abc123def456ghi789jkl012mno")
 | `mask_dict(data, *, sensitive_keys=None, show_first=4, show_last=3)` | Recursively mask sensitive key values in a dictionary |
 | `MaskedFormatter(fmt)` | Logging formatter that auto-redacts secret patterns (sk-..., eyJ..., AKIA..., URL credentials) |
 
+
+## Development
+
+```bash
+pip install -e .
+python -m pytest tests/ -v
+```
+
 ## License
 
 MIT
