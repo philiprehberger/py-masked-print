@@ -1,5 +1,9 @@
 # philiprehberger-masked-print
 
+[![Tests](https://github.com/philiprehberger/py-masked-print/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-masked-print/actions/workflows/publish.yml)
+[![PyPI version](https://img.shields.io/pypi/v/philiprehberger-masked-print.svg)](https://pypi.org/project/philiprehberger-masked-print/)
+[![License](https://img.shields.io/github/license/philiprehberger/py-masked-print)](LICENSE)
+
 Automatically mask sensitive values (API keys, passwords, tokens) in logs and print output.
 
 ## Install
