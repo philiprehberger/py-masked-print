@@ -24,9 +24,10 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/philiprehberger/py-masked-print"
+Homepage = "https://github.com/philiprehberger/py-masked-print#readme"
 Repository = "https://github.com/philiprehberger/py-masked-print"
 Issues = "https://github.com/philiprehberger/py-masked-print/issues"
+Changelog = "https://github.com/philiprehberger/py-masked-print/blob/main/CHANGELOG.md"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/philiprehberger_masked_print"]
