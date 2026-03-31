@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "philiprehberger-masked-print"
-version = "0.1.6"
+version = "0.1.7"
 description = "Automatically mask sensitive values (API keys, passwords, tokens) in logs and print output"
 readme = "README.md"
 license = "MIT"

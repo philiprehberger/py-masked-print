@@ -2,8 +2,7 @@
 
 [![Tests](https://github.com/philiprehberger/py-masked-print/actions/workflows/publish.yml/badge.svg)](https://github.com/philiprehberger/py-masked-print/actions/workflows/publish.yml)
 [![PyPI version](https://img.shields.io/pypi/v/philiprehberger-masked-print.svg)](https://pypi.org/project/philiprehberger-masked-print/)
-[![License](https://img.shields.io/github/license/philiprehberger/py-masked-print)](LICENSE)
-[![Sponsor](https://img.shields.io/badge/sponsor-GitHub%20Sponsors-ec6cb9)](https://github.com/sponsors/philiprehberger)
+[![Last updated](https://img.shields.io/github/last-commit/philiprehberger/py-masked-print)](https://github.com/philiprehberger/py-masked-print/commits/main)
 
 Automatically mask sensitive values (API keys, passwords, tokens) in logs and print output.
 
@@ -69,7 +68,6 @@ logger.info("Using key sk-proj-abc123def456ghi789jkl012mno")
 | `mask_dict(data, *, sensitive_keys=None, show_first=4, show_last=3)` | Recursively mask sensitive key values in a dictionary |
 | `MaskedFormatter(fmt)` | Logging formatter that auto-redacts secret patterns (sk-..., eyJ..., AKIA..., URL credentials) |
 
-
 ## Development
 
 ```bash
@@ -77,6 +75,24 @@ pip install -e .
 python -m pytest tests/ -v
 ```
 
+## Support
+
+If you find this project useful:
+
+⭐ [Star the repo](https://github.com/philiprehberger/py-masked-print)
+
+🐛 [Report issues](https://github.com/philiprehberger/py-masked-print/issues?q=is%3Aissue+is%3Aopen+label%3Abug)
+
+💡 [Suggest features](https://github.com/philiprehberger/py-masked-print/issues?q=is%3Aissue+is%3Aopen+label%3Aenhancement)
+
+❤️ [Sponsor development](https://github.com/sponsors/philiprehberger)
+
+🌐 [All Open Source Projects](https://philiprehberger.com/open-source-packages)
+
+💻 [GitHub Profile](https://github.com/philiprehberger)
+
+🔗 [LinkedIn Profile](https://www.linkedin.com/in/philiprehberger)
+
 ## License
 
-MIT
+[MIT](LICENSE)
