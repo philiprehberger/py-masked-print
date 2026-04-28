@@ -43,6 +43,18 @@ safe = mask_dict(config)
 # }
 ```
 
+### Extend defaults at runtime
+
+```python
+from philiprehberger_masked_print import register_pattern, register_sensitive_key
+
+# Add a domain-specific secret pattern picked up by MaskedFormatter
+register_pattern(r"PINPIN-\d{4,}")
+
+# Add a custom key that mask_dict should treat as sensitive
+register_sensitive_key("session_id")
+```
+
 ### Auto-mask log output
 
 ```python
@@ -67,6 +79,8 @@ logger.info("Using key sk-proj-abc123def456ghi789jkl012mno")
 | `mask(value, *, show_first=4, show_last=3, mask_char="*")` | Mask a string, keeping the first and last N characters visible |
 | `mask_dict(data, *, sensitive_keys=None, show_first=4, show_last=3)` | Recursively mask sensitive key values in a dictionary |
 | `MaskedFormatter(fmt)` | Logging formatter that auto-redacts secret patterns (sk-..., eyJ..., AKIA..., URL credentials) |
+| `register_pattern(pattern)` | Register an extra regex pattern for `MaskedFormatter` to redact |
+| `register_sensitive_key(key)` | Add a key substring to the default sensitive-key set used by `mask_dict` |
 
 ## Development
 

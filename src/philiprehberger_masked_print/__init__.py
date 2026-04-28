@@ -5,26 +5,30 @@ from __future__ import annotations
 import logging
 import re
 
-__all__ = ["mask", "mask_dict", "MaskedFormatter"]
+__all__ = [
+    "MaskedFormatter",
+    "mask",
+    "mask_dict",
+    "register_pattern",
+    "register_sensitive_key",
+]
 
-_DEFAULT_SENSITIVE_KEYS: frozenset[str] = frozenset(
-    {
-        "password",
-        "secret",
-        "token",
-        "api_key",
-        "apikey",
-        "authorization",
-        "auth",
-        "credential",
-        "private_key",
-        "access_token",
-        "refresh_token",
-        "database_url",
-        "connection_string",
-        "dsn",
-    }
-)
+_DEFAULT_SENSITIVE_KEYS: set[str] = {
+    "password",
+    "secret",
+    "token",
+    "api_key",
+    "apikey",
+    "authorization",
+    "auth",
+    "credential",
+    "private_key",
+    "access_token",
+    "refresh_token",
+    "database_url",
+    "connection_string",
+    "dsn",
+}
 
 _SECRET_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"sk-[A-Za-z0-9]{20,}"),
@@ -32,6 +36,29 @@ _SECRET_PATTERNS: list[re.Pattern[str]] = [
     re.compile(r"AKIA[A-Z0-9]{16}"),
     re.compile(r"://[^\s:]+:[^\s@]+@"),
 ]
+
+
+def register_pattern(pattern: re.Pattern[str] | str) -> None:
+    """Register a regex pattern that :class:`MaskedFormatter` should redact.
+
+    The pattern is appended to the global pattern list and applied on every
+    subsequent log record.
+
+    Args:
+        pattern: Compiled regex or pattern string. Strings are compiled with
+            default flags.
+    """
+    compiled = pattern if isinstance(pattern, re.Pattern) else re.compile(pattern)
+    _SECRET_PATTERNS.append(compiled)
+
+
+def register_sensitive_key(key: str) -> None:
+    """Register a key substring that :func:`mask_dict` treats as sensitive.
+
+    Matching is case-insensitive substring against the dict key. The new key
+    affects calls that don't pass an explicit ``sensitive_keys`` argument.
+    """
+    _DEFAULT_SENSITIVE_KEYS.add(key.lower())
 
 
 def mask(
@@ -66,7 +93,7 @@ def mask(
     return value[:show_first] + mask_char * masked_length + value[length - show_last :]
 
 
-def _is_sensitive_key(key: str, sensitive_keys: frozenset[str]) -> bool:
+def _is_sensitive_key(key: str, sensitive_keys: frozenset[str] | set[str]) -> bool:
     """Check if a key matches any sensitive key via case-insensitive substring match."""
     lower = key.lower()
     return any(s in lower for s in sensitive_keys)
@@ -91,13 +118,17 @@ def mask_dict(
     Returns:
         A new dictionary with sensitive string values masked.
     """
-    keys = frozenset(sensitive_keys) if sensitive_keys is not None else _DEFAULT_SENSITIVE_KEYS
+    keys: frozenset[str] | set[str]
+    if sensitive_keys is None:
+        keys = _DEFAULT_SENSITIVE_KEYS
+    else:
+        keys = frozenset(sensitive_keys)
     return _mask_dict_recursive(data, keys, show_first, show_last)
 
 
 def _mask_dict_recursive(
     data: dict[str, object],
-    sensitive_keys: frozenset[str],
+    sensitive_keys: frozenset[str] | set[str],
     show_first: int,
     show_last: int,
 ) -> dict[str, object]:
