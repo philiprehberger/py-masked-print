@@ -138,3 +138,49 @@ class TestRegisterSensitiveKey:
         finally:
             from philiprehberger_masked_print import _DEFAULT_SENSITIVE_KEYS as keys
             keys.discard("customtoken")
+
+
+class TestMaskDictPaths:
+    def test_path_glob_masks_nested_field(self):
+        data = {
+            "database": {
+                "primary": {"host": "db1", "password": "secretvalue123"},
+                "replica": {"host": "db2", "password": "anothersecret456"},
+            },
+        }
+        out = mask_dict(data, paths=["database.*.password"])
+        assert "*" in str(out["database"]["primary"]["password"])
+        assert "*" in str(out["database"]["replica"]["password"])
+        assert out["database"]["primary"]["host"] == "db1"
+
+    def test_path_glob_exact_match(self):
+        data = {"auth": {"token": "xyzabc123456", "public_key": "pk_abcdefghij"}}
+        out = mask_dict(data, paths=["auth.public_key"], sensitive_keys=[])
+        assert out["auth"]["token"] == "xyzabc123456"  # not masked
+        assert "*" in str(out["auth"]["public_key"])
+
+    def test_path_globs_compose_with_sensitive_keys(self):
+        data = {
+            "password": "topsecretvalue",
+            "audit": {"trace_id": "abc1234567890def"},
+        }
+        out = mask_dict(data, paths=["audit.trace_id"])
+        assert "*" in str(out["password"])  # default sensitive key
+        assert "*" in str(out["audit"]["trace_id"])  # path glob
+
+    def test_path_no_match_leaves_value_alone(self):
+        data = {"foo": {"bar": "longvalue1234567"}}
+        out = mask_dict(data, paths=["nope.*"], sensitive_keys=[])
+        assert out["foo"]["bar"] == "longvalue1234567"
+
+    def test_wildcard_only_matches_one_segment(self):
+        data = {"a": {"b": {"c": "needsmasking12345"}}}
+        out = mask_dict(data, paths=["a.*"], sensitive_keys=[])
+        # "a.*" does not match "a.b.c"
+        assert out["a"]["b"]["c"] == "needsmasking12345"
+
+    def test_no_paths_keeps_legacy_behavior(self):
+        data = {"username": "alice", "password": "topsecret123456"}
+        out = mask_dict(data)
+        assert out["username"] == "alice"
+        assert "*" in str(out["password"])

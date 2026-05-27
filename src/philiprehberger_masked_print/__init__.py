@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import fnmatch
 import logging
 import re
 
@@ -103,15 +104,23 @@ def mask_dict(
     data: dict[str, object],
     *,
     sensitive_keys: frozenset[str] | set[str] | list[str] | None = None,
+    paths: list[str] | None = None,
     show_first: int = 4,
     show_last: int = 3,
 ) -> dict[str, object]:
-    """Recursively mask values whose keys match sensitive key patterns.
+    """Recursively mask values whose keys match sensitive key patterns or paths.
 
     Args:
         data: The dictionary to process.
         sensitive_keys: Key substrings to treat as sensitive. Defaults to a
-            built-in set covering common secret field names.
+            built-in set covering common secret field names. Matched
+            case-insensitively against each key individually.
+        paths: Optional list of dotted path globs that target nested keys.
+            Wildcards (``*``) match a single path segment. For example,
+            ``"database.*.password"`` masks ``database.primary.password`` and
+            ``database.replica.password`` but not ``database.password``.
+            Path matching is case-sensitive and runs in addition to
+            ``sensitive_keys`` matching.
         show_first: Number of leading characters to keep visible in masked values.
         show_last: Number of trailing characters to keep visible in masked values.
 
@@ -123,20 +132,45 @@ def mask_dict(
         keys = _DEFAULT_SENSITIVE_KEYS
     else:
         keys = frozenset(sensitive_keys)
-    return _mask_dict_recursive(data, keys, show_first, show_last)
+    path_globs = list(paths) if paths else []
+    return _mask_dict_recursive(data, keys, path_globs, "", show_first, show_last)
+
+
+def _path_matches(path: str, globs: list[str]) -> bool:
+    """Match a dotted path against a list of segment-aware globs.
+
+    Each ``*`` in a glob matches a single path segment — it does not span dots.
+    For example, ``"a.*"`` matches ``"a.b"`` but not ``"a.b.c"``.
+    """
+    path_segments = path.split(".")
+    for glob in globs:
+        glob_segments = glob.split(".")
+        if len(glob_segments) != len(path_segments):
+            continue
+        if all(fnmatch.fnmatchcase(p, g) for p, g in zip(path_segments, glob_segments)):
+            return True
+    return False
 
 
 def _mask_dict_recursive(
     data: dict[str, object],
     sensitive_keys: frozenset[str] | set[str],
+    path_globs: list[str],
+    current_path: str,
     show_first: int,
     show_last: int,
 ) -> dict[str, object]:
     result: dict[str, object] = {}
     for key, value in data.items():
+        child_path = f"{current_path}.{key}" if current_path else key
         if isinstance(value, dict):
-            result[key] = _mask_dict_recursive(value, sensitive_keys, show_first, show_last)
-        elif isinstance(value, str) and _is_sensitive_key(key, sensitive_keys):
+            result[key] = _mask_dict_recursive(
+                value, sensitive_keys, path_globs, child_path, show_first, show_last,
+            )
+        elif isinstance(value, str) and (
+            _is_sensitive_key(key, sensitive_keys)
+            or _path_matches(child_path, path_globs)
+        ):
             result[key] = mask(value, show_first=show_first, show_last=show_last)
         else:
             result[key] = value

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.3.0 (2026-05-26)
+
+- Add `paths=` parameter to `mask_dict()` for targeting nested keys with dotted globs (e.g., `"database.*.password"`). Path matching runs in addition to the default `sensitive_keys` matching.
+- Add package-card image to README
+
 ## 0.2.0 (2026-04-27)
 
 - Add `register_pattern(pattern)` to register additional regex patterns that `MaskedFormatter` should redact
